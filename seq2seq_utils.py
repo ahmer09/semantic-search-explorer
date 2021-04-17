@@ -119,6 +119,33 @@ def extract_encoder_model(model):
 
     Returns a keras model object that has one input (body of issue)
     and one output, which is the last hidden state.
-    :param model:
+
+    :param model: keras model object
     :return:
+    keras model object
     """
+    encoder_model = model.get_layer('Encoder-Model')
+    return encoder_model
+
+def extract_decoder_model(model):
+    """
+    Extract the decoder from original model
+
+    :param model: keras model  object
+    :return:
+    keras model object
+    Inputs of Keras Model That Is Returned:
+    1: the embedding index for the last predicted word or the <Start> indicator
+    2: the last hidden state, or in the case of the first word the hidden state from the encoder
+
+    Outputs of Keras Model That Is Returned:
+    1.  Prediction (class probabilities) for the next word
+    2.  The hidden state of the decoder, to be fed back into the decoder at the next time step
+
+    """
+    latent_dim = model.get_layer('Decoder-Word-Embedding').output_shape[-1]
+
+    # Reconstruct the input into the decoder
+    decoder_inputs = model.get_layer('Decoder-Input').input
+    dec_emb = model.get_layer('Decoder-Word_Embedding')(decoder_inputs)
+    dec_bn = model.get_layer('Decoder-Batchnorm-1')(dec_emb)
